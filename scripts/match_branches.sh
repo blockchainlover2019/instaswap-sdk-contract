@@ -1,0 +1,1 @@
+cat ../ratio-frontend/.git/HEAD | sed 's/.*heads\///g'

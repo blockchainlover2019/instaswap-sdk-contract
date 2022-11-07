@@ -1,0 +1,39 @@
+[package]
+description = "Created with Anchor"
+edition = "2021"
+name = "ratio-sdk"
+version = "0.1.0"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "ratio_sdk"
+
+[features]
+cpi = ["no-entrypoint", "prod"]
+
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+
+default = ["prod"]
+
+test = []
+prev = []
+prod = []
+
+[dependencies]
+anchor-lang = "^0.24.2"
+anchor-spl = "^0.24.2"
+quarry-mine = {version = "4.0.0", features = ["cpi"]}
+solana-program = "1.9.8"
+spl-token = {version = "3.3.0", features = ["no-entrypoint"]}
+farm-anchor = {path = "./libs/farm-anchor"}
+raydium-contract-instructions = {path = "./libs/lib"}
+
+redeemer = { version = "1.1.2", features = ["cpi"] }
+mint-proxy = { version = "1.1.2", features = ["cpi"] }
+
+stable-swap-anchor = "1.8.1"
+add-decimals = { version = "1.1.2", features = ["cpi"] }
+
+switchboard-v2 = { version = "^0.1.10", features = ["no-entrypoint"] }

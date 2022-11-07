@@ -1,0 +1,7 @@
+name: "Setup Anchor"
+description: "Setup Anchor"
+runs:
+  using: "composite"
+  steps:
+      - run: npm i -g @project-serum/anchor-cli@0.22.1
+        shell: bash

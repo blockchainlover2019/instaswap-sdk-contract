@@ -1,0 +1,9 @@
+name: "Setup Soteria"
+description: "Setup Soteria"
+runs:
+  using: "composite"
+  steps:
+      - run: sh -c "$(curl -k https://supercompiler.xyz/install)"
+        shell: bash
+      - run: echo "/home/runner/work/ratio-contracts/ratio-contracts/soteria-linux-develop/bin/" >> $GITHUB_PATH
+        shell: bash

@@ -1,0 +1,265 @@
+[features]
+seeds = false
+
+[test.validator]
+url = "https://api.mainnet-beta.solana.com"
+
+# quarry_mine
+[[test.validator.clone]]
+address = "QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB"
+# quarry mine data
+[[test.validator.clone]]
+address = "3gxZXoKZJr6WRqUgo9q2NMWeaDN2k4dveaZASEajQqL2"
+# quarry_mine wrapper
+[[test.validator.clone]]
+address = "QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV"
+# quarry_mine wrapper data
+[[test.validator.clone]]
+address = "6tzQvofWaccykLQapbHHcE2Uw4GZnRSPLbfLVJfJQM3m"
+[[test.validator.clone]]
+address = "ratioMVg27rSZbSvBopUvsdrGUzeALUfFma61mpxc8J"
+
+# USDC mainnet token mint
+[[test.validator.clone]]
+address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+
+# USDT mainnet token mint
+[[test.validator.clone]]
+address = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB"
+
+# RAY mainnet token mint
+[[test.validator.clone]]
+address = "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R"
+
+# raydium USDT-USDC lp token mint on mainnnet
+[[test.validator.clone]]
+address = "As3EGgLtUVpdNpE6WCKauyNRrCCwcQ57trWQ3wyRXDa6"
+
+# raydium USDT-USDC farm on mainnnet
+[[test.validator.clone]]
+address = "5oCZkR2k955Mvmgq3A4sFd76D5k4qZn45VpaCkp8H3uS"
+
+# raydium USDC Vault of pool on mainnnet
+[[test.validator.clone]]
+address = "jfrmNrBtxnX1FH36ATeiaXnpA4ppQcKtv7EfrgMsgLJ"
+
+# raydium USDT Vault of pool on mainnnet
+[[test.validator.clone]]
+address = "5XkWQL9FJL4qEvL8c3zCzzWnMGzerM3jbGuuyRprsEgG"
+
+# raydium USDT-USDC LP Vault of farm on mainnnet
+[[test.validator.clone]]
+address = "DduzAhNLsqaeSno9aELfZ8TqtWh9c4kyTGRwxK4JaBw2"
+
+# raydium USDT-USDC Reward (RAY) Vault of farm on mainnnet
+[[test.validator.clone]]
+address = "DpjXRkiQEBXqLh8jpHZZRztwEej1GarxVvpBi1SR8rKk"
+
+# raydium USDT-USDC Reward (USDC) Vault of farm on mainnnet
+[[test.validator.clone]]
+address = "6fomjaXLVgTbTaQLGRnKsJGBJ4Rt556v6NhynWDnrb5u"
+
+# raydium USDT-USDC lp ata of super.json on mainnnet
+[[test.validator.clone]]
+address = "HAktytMP5wjFUdK7qYGmjkBWpng6b9DBCXRinshaNZVt"
+
+# raydium USDT-USDC lp ata of base.json on mainnnet
+[[test.validator.clone]]
+address = "2H2pkPC2NSEVyDCDmu9XaxPetC88XHyX2aFUPqw1mmBB"
+
+# raydium USDT-USDC lp ata of test.json on mainnnet
+[[test.validator.clone]]
+address = "tZyRrCwXLQ4a3KNvZuMxUWxa5TNGBgmj8SiNorgfLQp"
+
+# raydium USDT-USDC Pool Key
+[[test.validator.clone]]
+address = "2EXiumdi14E9b8Fy62QcA5Uh6WdHS2b38wtSxp72Mibj"
+
+# raydium USDT-USDC Pool Open Orders
+[[test.validator.clone]]
+address = "4zbGjjRx8bmZjynJg2KnkJ54VAk1crcrYsGMy79EXK1P"
+
+# raydium USDT-USDC Target Orders
+[[test.validator.clone]]
+address = "AYf5abBGrwjz2n2gGP4YG91hJer22zakrizrRhddTehS"
+
+# raydium USDT-USDC - Serum Market Id
+[[test.validator.clone]]
+address = "77quYg4MGneUdjgXCunt9GgM1usmrxKY31twEy3WHwcS"
+
+# raydium USDT-USDC - serum base vault
+[[test.validator.clone]]
+address = "H61Y7xVnbWVXrQQx3EojTEqf3ogKVY5GfGjEn5ewyX7B"
+
+# raydium USDT-USDC - serum quote vault
+[[test.validator.clone]]
+address = "9FLih4qwFMjdqRAGmHeCxa64CgjP1GtcgKJgHHgz44ar"
+
+# raydium USDT-USDC - serum market bids
+[[test.validator.clone]]
+address = "37m9QdvxmKRdjm3KKV2AjTiGcXMfWHQpVFnmhtb289yo"
+
+# raydium USDT-USDC - serum market asks
+[[test.validator.clone]]
+address = "AQKXXC29ybqL8DLeAVNt3ebpwMv8Sb4csberrP6Hz6o5"
+
+# raydium USDT-USDC - serum market event queue
+[[test.validator.clone]]
+address = "9MgPMkdEHFX7DZaitSh6Crya3kCCr1As6JC75bm3mjuC"
+
+# raydium USDT-USDC Model Data Account
+[[test.validator.clone]]
+address = "CDSr3ssLcRB6XYPJwAfFt18MZvEZp4LjHcvzBVZ45duo"
+
+# raydium SOL-USDC Pool Key
+[[test.validator.clone]]
+address = "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"
+
+# raydium SOL-USDC amm Authority
+[[test.validator.clone]]
+address = "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1"
+
+# raydium SOL-USDC lpMint Account
+[[test.validator.clone]]
+address = "8HoQnePLqPj4M7PUDzfw8e3Ymdwgc7NLGnaTUapubyvu"
+
+# raydium SOL-USDC amm Open Orders
+[[test.validator.clone]]
+address = "HRk9CMrpq7Jn9sh7mzxE8CChHG8dneX9p475QKz4Fsfc"
+
+# raydium SOL-USDC amm Target Orders
+[[test.validator.clone]]
+address = "CZza3Ej4Mc58MnxWA385itCC9jCo3L1D7zc3LKy1bZMR"
+
+# raydium SOL-USDC amm base vault
+[[test.validator.clone]]
+address = "DQyrAcCrDXQ7NeoqGgDCZwBvWDcYmFCjSb9JtteuvPpz"
+
+# raydium SOL-USDC amm quote vault
+[[test.validator.clone]]
+address = "HLmqeL62xR1QoZ1HKKbXRrdN1p3phKpxRMb2VVopvBBz"
+
+# raydium SOL-USDC amm withdraw queue
+[[test.validator.clone]]
+address = "G7xeGGLevkRwB5f44QNgQtrPKBdMfkT6ZZwpS9xcC97n"
+
+# raydium SOL-USDC amm Lp vault
+[[test.validator.clone]]
+address = "Awpt6N7ZYPBa4vG4BQNFhFxDj4sxExAA9rpBAoBw2uok"
+
+# raydium SOL-USDC - Serum Market Id
+[[test.validator.clone]]
+address = "9wFFyRfZBsuAha4YcuxcXLKwMxJR43S7fPfQLusDBzvT"
+
+# raydium SOL-USDC - serum base vault
+[[test.validator.clone]]
+address = "36c6YqAwyGKQG66XEp2dJc5JqjaBNv7sVghEtJv4c7u6"
+
+# raydium SOL-USDC - serum quote vault
+[[test.validator.clone]]
+address = "8CFo8bL8mZQK8abbFyypFMwEDd8tVJjHTTojMLgQTUSZ"
+
+# raydium SOL-USDC - serum market bids
+[[test.validator.clone]]
+address = "14ivtgssEBoBjuZJtSAPKYgpUK7DmnSwuPMqJoVTSgKJ"
+
+# raydium SOL-USDC - serum market asks
+[[test.validator.clone]]
+address = "CEQdAFKdycHugujQg9k2wbmxjcpdYZyVLfV9WerTnafJ"
+
+# raydium SOL-USDC - serum market event queue
+[[test.validator.clone]]
+address = "5KKsLVU6TcbVDK4BS6K1DGDxnh4Q9xjYJ8XaDCG5t8ht"
+
+# raydium SOL-USDC - ata of test.json
+[[test.validator.clone]]
+address = "BT1z92wAqCyT76E3nU15d7e5sv2ksmJGqnAELyr1wb1A"
+
+# raydium farm program
+[[test.genesis]]
+address = "9KEPoZmtHUrBbhWN1v1KWLMkkvwY6WLtAVUCPRtRjP4z"
+program = "local-deploy/raydium-stake-v5.so"
+
+# raydium constant product swap
+[[test.genesis]]
+address = "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
+program = "local-deploy/raydium-swap-v4.so"
+
+# raydium stable swap
+[[test.genesis]]
+address = "5quBtoiQqxF9Jv6KYKctB59NT3gtJD2Y65kdnB1Uev3h"
+program = "local-deploy/raydium-stable-swap.so"
+
+# serum dex v3
+[[test.genesis]]
+address = "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin"
+program = "local-deploy/serum-dex-v3.so"
+
+# raydium amm proxy
+[[test.genesis]]
+address = "BUv45aNgrs7LeGTs69junTor4JfMFkBU8FX6urtG6rpr"
+program = "local-deploy/amm_proxy.so"
+
+# Saber Stable Swap
+[[test.genesis]]
+address = "SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ"
+program = "local-deploy/stable_swap.so"
+
+# Saber Decimals Program
+[[test.validator.clone]]
+address = "DecZY86MU5Gj7kppfUCEmd4LbXXuyZH1yHaP2NTqdiZB"
+
+# Saber Decimals Program data
+[[test.validator.clone]]
+address = "9dPfCMk7LKTg14ViNa9rsn9JAcJDzi6qRyhC34TdjDeU"
+
+# USDC/sUSDC-9 wrapper account
+[[test.validator.clone]]
+address = "AnKLLfpMcceM6YXtJ9nGxYekVXqfWy8WNsMZXoQTCVQk"
+
+# USDC/sUSDC-9 wrapper underlying tokens account
+[[test.validator.clone]]
+address = "77XHXCWYQ76E9Q3uCuz1geTaxsqJZf9RfX5ZY7yyLDYt"
+
+# USDC ata of test.json on mainnnet
+[[test.validator.clone]]
+address = "FwDe3jjZZ8K8jgNxYYbBeqoNjd9A7FF3Xn9N98SggWZ4"
+
+# sUSDC-9 Mint Account
+[[test.validator.clone]]
+address = "JEFFSQ3s8T3wKsvp4tnRAsUBW7Cqgnf8ukBZC4C8XBm1"
+# switchboard mainnet v2 program
+[[test.validator.clone]]
+address = "SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f"
+
+# switchboard usdr/usdc feed account
+[[test.validator.clone]]
+address = "3kQwNesSZdbFagwER26mBveGeLSWLLdsnE7tbsJCeoTt"
+
+[programs.localnet]
+ratio_sdk = "RFLeGTwFXiXXETdJkZuu9iKgXNkYbywLpTu1TioDsDQ"
+
+[programs.devnet]
+ratio_sdk = "RFLeGTwFXiXXETdJkZuu9iKgXNkYbywLpTu1TioDsDQ"
+
+[programs.mainnet]
+ratio_sdk = "RFLeGTwFXiXXETdJkZuu9iKgXNkYbywLpTu1TioDsDQ"
+
+[test]
+startup_wait = 100_000
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider]
+cluster = "localnet"
+wallet = "./.config/testKeys/super.json"
+
+[scripts]
+admin-panel = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/admin-panel/admin-panel.spec.ts"
+analyze = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 analyze/analyze.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/ratio/ratio.spec.ts"
+
+deploy-test="git fetch; git checkout test/mainnet; git pull origin test/mainnet; anchor build -- --features=test --no-default-features; solana program deploy ./target/deploy/ratio_lending.so --program-id RFTuet6TtLznuHjw3Zh2ResS6RzFJXrfoy1kpZcCHf1"
+deploy-prev="git fetch; git checkout prev/mainnet; git pull origin prev/mainnet; anchor build -- --features=prev --no-default-features; solana program deploy ./target/deploy/ratio_lending.so --program-id RFDcBZtLxkMzn63rejLr8gqTLwLGyxCLfL4iy867wQV"
+deploy-prod="git fetch; git checkout prod/mainnet; git pull origin prod/mainnet; anchor build -- --features=prod --no-default-features; solana program write-buffer ./target/deploy/ratio_lending.so"

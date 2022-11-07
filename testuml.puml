@@ -1,0 +1,149 @@
+@startuml
+
+
+' ("dev/devnet") as dd
+' ("dev/localnet") -> dd
+' (*) --> "Active Development" : hey
+' (*) --> "test/"
+' (*) --> "Production"
+
+rectangle "Testing smart contracts" {
+  ' (testing) -> patience
+  frame "<size:10>environment:</size>  development" {
+    class "Step 1" {
+      .. <size:10>net</size> ..
+      localnet
+      .. <size:9>branch name</size> ..
+      <size:9> test/dev/localnet</size>
+    }
+
+    class "Step 2" {
+      .. <size:10>net</size> ..
+      devnet
+      .. <size:9>branch name</size> ..
+      <size:9> test/dev/devnet</size>
+    }
+
+    class "Step 3" {
+      .. <size:10>net</size> ..
+      mainnet
+      .. <size:9>branch name</size> ..
+      <size:9> test/dev/mainnet</size>
+    }
+
+  }
+  frame "<size:10>environment:</size>  production" {
+    class "Step 4" {
+      .. <size:10>net</size> ..
+      localnet
+      .. <size:9>branch name</size> ..
+      <size:9> test/dev/localnet</size>
+    }
+
+    class "Step 5" {
+      .. <size:10>net</size> ..
+      devnet
+      .. <size:9>branch name</size> ..
+      <size:9> test/dev/devnet</size>
+    }
+
+    class "Step 6" {
+      .. <size:10>net</size> ..
+      mainnet
+      .. <size:9>branch name</size> ..
+      <size:9> test/dev/mainnet</size>
+    }
+  }
+
+  "Step 1" -[hidden]down-|> "Step 4"
+  "Step 1" -right-> "Step 2"
+  "Step 2" -right-> "Step 3"
+  "Step 3" -down-> "Step 4"
+  "Step 4" -right-> "Step 5"
+  "Step 5" -right-> "Step 6"
+}
+
+rectangle "Testing anything else" {
+  frame "<size:10>network:</size>  mainnet" {
+    class "Step-5" as s5 {
+      .. <size:10>env</size> ..
+      dev
+      .. <size:9>branch name</size> ..
+      <size:9> test/dev/mainnet</size>
+    }
+
+    class "Step-6" as s6 {
+      .. <size:10>env</size> ..
+      prod
+      .. <size:9>branch name</size> ..
+      <size:9> test/prod/mainnet</size>
+    }
+    s5 -down-> s6
+  }
+  frame "<size:10>network:</size>  devnet" {
+    class "Step-3" as s3 {
+      .. <size:10>env</size> ..
+      dev
+      .. <size:9>branch name</size> ..
+      <size:9> test/dev/devnet</size>
+    }
+    class "Step-4" as s4 {
+      .. <size:10>env</size> ..
+      prod
+      .. <size:9>branch name</size> ..
+      <size:9> test/prod/devnet</size>
+    }
+    s3 -down-> s4
+  }
+  frame "<size:10>network:</size>  localnet" {
+    class "Step-1" as s1 {
+      .. <size:10>env</size> ..
+      dev
+      .. <size:9>branch name</size> ..
+      <size:9>test/dev/localnet</size>
+    }
+    class "Step-2" as s2 {
+      .. <size:10>env</size> ..
+      prod
+      .. <size:9>branch name</size> ..
+      <size:9> test/prod/localnet</size>
+    }
+    s1 -down-> s2
+  }
+  s1 -[hidden]right|> s3
+  s3 -[hidden]right|> s5
+  s2 -[hidden]right|> s4
+  s4 -[hidden]right|> s6
+  s2 -up-> s3
+  s4 -up-> s5
+}
+
+' bar1 : [bold] : [green]
+' bar2 : [dashed]
+' bar3 : [dotted]
+' bar4 : [hidden]
+' bar5 : [plain]
+
+
+' if "Some Test" then
+'   "test/" --> "dev/localnet"
+'   ' flow 1: smart contracts repo
+'   "dev/localnet" --> "prod/localnet"
+'   "dev/devnet" --> "prod/devnet"
+'   "dev/mainnet-beta" --> "prod/mainnet-beta"
+
+'   "dev/localnet" -> "dev/devnet"
+'   "dev/devnet" -> "dev/mainnet-beta"
+
+'   "prod/localnet" -> "prod/devnet"
+'   "prod/devnet" -> "prod/mainnet-beta"
+
+'   "Production" --> "Some Action"
+'   --> "Another Action"
+'   -right-> (*)
+' else
+'   -->[false] "Something else"
+'   --->[Ending process] (*)
+' endif
+
+@enduml
