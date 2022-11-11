@@ -1,8 +1,9 @@
 // libraries
 use anchor_lang::prelude::*;
+use borsh::{ BorshDeserialize };
 
 #[account]
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct GlobalState {
     /// Bump/nonce for the global state pda
     pub bump: u8,

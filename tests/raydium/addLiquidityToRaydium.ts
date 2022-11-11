@@ -1,47 +1,39 @@
 import { ComputeBudgetProgram, Transaction } from "@solana/web3.js";
 import { PublicKey } from "@solana/web3.js";
 import { BN, Program, workspace } from "@project-serum/anchor";
-import { RatioLending } from "../../target/types/ratio_lending";
+import { RatioSdk } from "../../target/types/ratio_sdk";
 import {
 	TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 
-import { addZeros, delay, getAssocTokenAcct, handleTxn, toUiAmount } from "../utils/fxns";
+import { addZeros, delay, getAssocTokenAcct, handleTxn } from "../utils/fxns";
 // @ts-ignore
 import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
 import { User } from "../interfaces";
-import { Accounts } from "../config/accounts";
+import { RATIO_GLOBAL_STATE_KEY, RATIO_TREASURY_KEY } from "../utils/constants";
 
 // program
-const programRatioLending = workspace.RatioLending as Program<RatioLending>;
+const programRatioSdk = workspace.RatioSdk as Program<RatioSdk>;
 
 export const addLiquidityToRaydium = async (
   testUser: User,
-	treasury: User,
-	accounts: Accounts,
   version: number
 ) => {
   if (version == 4) {
     await addLiquidityToRaydiumV4(
-      testUser,
-      treasury,
-      accounts
+      testUser
     );
   } else if (version == 5) {
     await addLiquidityToRaydiumV5(
-      testUser,
-      treasury,
-      accounts
+      testUser
     );
   }
 }
 export const addLiquidityToRaydiumV4 = async (
-	testUser: User,
-	treasury: User,
-	accounts: Accounts
+	testUser: User
 ) => {
 	const testUserWallet = testUser.wallet;
-	const treasuryWallet = treasury.wallet;
+	const treasuryWalletKey = new PublicKey(RATIO_TREASURY_KEY);
 
 	// configuration keys for Raydium SOL_USDC Pool on raydium mainnet
 	const config = {
@@ -80,8 +72,8 @@ export const addLiquidityToRaydiumV4 = async (
   const connection = testUser.provider.connection;
 	let ataUserTokenA = await getOrCreateAssociatedTokenAccount(connection, testUserWallet.payer, solMint, testUserWallet.publicKey, true);
 	let ataUserTokenB = await getOrCreateAssociatedTokenAccount(connection, testUserWallet.payer, usdcMint, testUserWallet.publicKey, true);
-	let ataTokenATreasury = await getOrCreateAssociatedTokenAccount(connection, testUserWallet.payer, solMint, treasuryWallet.publicKey, true);
-	let ataTokenBTreasury = await getOrCreateAssociatedTokenAccount(connection, testUserWallet.payer, usdcMint, treasuryWallet.publicKey, true);
+	let ataTokenATreasury = await getOrCreateAssociatedTokenAccount(connection, testUserWallet.payer, solMint, treasuryWalletKey, true);
+	let ataTokenBTreasury = await getOrCreateAssociatedTokenAccount(connection, testUserWallet.payer, usdcMint, treasuryWalletKey, true);
 
   let userTokenABalance = await connection.getTokenAccountBalance(ataUserTokenA.address);
   let userTokenBBalance = await connection.getTokenAccountBalance(ataUserTokenB.address);
@@ -96,13 +88,13 @@ export const addLiquidityToRaydiumV4 = async (
 	units: 1400000,
 	additionalFee: 0,
   }));
-	tx.add(await programRatioLending.methods.addLiquidityToRaydium(
+	tx.add(await programRatioSdk.methods.addLiquidityToRaydium(
 		4,
     oldAmountA,
     oldAmountB,
 	).accounts({
 		authority: testUserWallet.publicKey,
-		globalState: accounts.global.pubKey,
+		globalState: RATIO_GLOBAL_STATE_KEY,
 		ataTokenATreasury: ataTokenATreasury.address,
 		ataTokenBTreasury: ataTokenBTreasury.address,
 		ammId: new PublicKey(config.id),
@@ -123,7 +115,6 @@ export const addLiquidityToRaydiumV4 = async (
 		tokenProgram: TOKEN_PROGRAM_ID,
 	}).instruction()
 	);
-
 	await handleTxn(tx, testUser.provider.connection, testUserWallet);
 
 	await delay(2000);
@@ -132,12 +123,10 @@ export const addLiquidityToRaydiumV4 = async (
 
 
 export const addLiquidityToRaydiumV5 = async (
-	testUser: User,
-	treasury: User,
-	accounts: Accounts
+	testUser: User
 ) => {
 	const testUserWallet = testUser.wallet;
-	const treasuryWallet = treasury.wallet;
+	const treasuryWalletKey = new PublicKey(RATIO_TREASURY_KEY);
 
 	// configuration keys for Raydium SOL_USDC Pool on raydium mainnet
 	const config = {
@@ -177,11 +166,14 @@ export const addLiquidityToRaydiumV5 = async (
   const connection = testUser.provider.connection;
 	let ataUserTokenA = await getOrCreateAssociatedTokenAccount(connection, testUserWallet.payer, solMint, testUserWallet.publicKey, true);
 	let ataUserTokenB = await getOrCreateAssociatedTokenAccount(connection, testUserWallet.payer, usdcMint, testUserWallet.publicKey, true);
-	let ataTokenATreasury = await getOrCreateAssociatedTokenAccount(connection, testUserWallet.payer, solMint, treasuryWallet.publicKey, true);
-	let ataTokenBTreasury = await getOrCreateAssociatedTokenAccount(connection, testUserWallet.payer, usdcMint, treasuryWallet.publicKey, true);
+	let ataTokenATreasury = await getOrCreateAssociatedTokenAccount(connection, testUserWallet.payer, solMint, treasuryWalletKey, true);
+	let ataTokenBTreasury = await getOrCreateAssociatedTokenAccount(connection, testUserWallet.payer, usdcMint, treasuryWalletKey, true);
 
   let userTokenABalance = await connection.getTokenAccountBalance(ataUserTokenA.address);
   let userTokenBBalance = await connection.getTokenAccountBalance(ataUserTokenB.address);
+  
+  console.log("ataUserTokenA.address =", ataUserTokenA.address.toBase58());
+  console.log("ataUserTokenB.address =", ataUserTokenB.address.toBase58());
 
 	let tx = new Transaction();
 
@@ -193,13 +185,13 @@ export const addLiquidityToRaydiumV5 = async (
 	units: 1400000,
 	additionalFee: 0,
   }));
-	tx.add(await programRatioLending.methods.addLiquidityToRaydium(
+	tx.add(await programRatioSdk.methods.addLiquidityToRaydium(
 		5,
     oldAmountA,
     oldAmountB,
 	).accounts({
 		authority: testUserWallet.publicKey,
-		globalState: accounts.global.pubKey,
+		globalState: RATIO_GLOBAL_STATE_KEY,
 		ataTokenATreasury: ataTokenATreasury.address,
 		ataTokenBTreasury: ataTokenBTreasury.address,
 		ammId: new PublicKey(config.id),

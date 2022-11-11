@@ -4,21 +4,6 @@ seeds = false
 [test.validator]
 url = "https://api.mainnet-beta.solana.com"
 
-# quarry_mine
-[[test.validator.clone]]
-address = "QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB"
-# quarry mine data
-[[test.validator.clone]]
-address = "3gxZXoKZJr6WRqUgo9q2NMWeaDN2k4dveaZASEajQqL2"
-# quarry_mine wrapper
-[[test.validator.clone]]
-address = "QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV"
-# quarry_mine wrapper data
-[[test.validator.clone]]
-address = "6tzQvofWaccykLQapbHHcE2Uw4GZnRSPLbfLVJfJQM3m"
-[[test.validator.clone]]
-address = "ratioMVg27rSZbSvBopUvsdrGUzeALUfFma61mpxc8J"
-
 # USDC mainnet token mint
 [[test.validator.clone]]
 address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
@@ -228,22 +213,19 @@ address = "FwDe3jjZZ8K8jgNxYYbBeqoNjd9A7FF3Xn9N98SggWZ4"
 # sUSDC-9 Mint Account
 [[test.validator.clone]]
 address = "JEFFSQ3s8T3wKsvp4tnRAsUBW7Cqgnf8ukBZC4C8XBm1"
-# switchboard mainnet v2 program
-[[test.validator.clone]]
-address = "SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f"
 
-# switchboard usdr/usdc feed account
+# Ratio Global State
 [[test.validator.clone]]
-address = "3kQwNesSZdbFagwER26mBveGeLSWLLdsnE7tbsJCeoTt"
+address = "G4Ssyc3WngzCnHbeeNhtdbEhZ7R7uXHMATuY9Uay2ycX"
 
 [programs.localnet]
-ratio_sdk = "RFLeGTwFXiXXETdJkZuu9iKgXNkYbywLpTu1TioDsDQ"
+ratio_sdk = "5Exy8rs5vusEwFCGHUVZAEo9QtpcTne9ni9jukH2AHB8"
 
 [programs.devnet]
-ratio_sdk = "RFLeGTwFXiXXETdJkZuu9iKgXNkYbywLpTu1TioDsDQ"
+ratio_sdk = "5Exy8rs5vusEwFCGHUVZAEo9QtpcTne9ni9jukH2AHB8"
 
 [programs.mainnet]
-ratio_sdk = "RFLeGTwFXiXXETdJkZuu9iKgXNkYbywLpTu1TioDsDQ"
+ratio_sdk = "5Exy8rs5vusEwFCGHUVZAEo9QtpcTne9ni9jukH2AHB8"
 
 [test]
 startup_wait = 100_000
@@ -258,7 +240,7 @@ wallet = "./.config/testKeys/super.json"
 [scripts]
 admin-panel = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/admin-panel/admin-panel.spec.ts"
 analyze = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 analyze/analyze.ts"
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/ratio/ratio.spec.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/sdk-contract.spec.ts"
 
 deploy-test="git fetch; git checkout test/mainnet; git pull origin test/mainnet; anchor build -- --features=test --no-default-features; solana program deploy ./target/deploy/ratio_lending.so --program-id RFTuet6TtLznuHjw3Zh2ResS6RzFJXrfoy1kpZcCHf1"
 deploy-prev="git fetch; git checkout prev/mainnet; git pull origin prev/mainnet; anchor build -- --features=prev --no-default-features; solana program deploy ./target/deploy/ratio_lending.so --program-id RFDcBZtLxkMzn63rejLr8gqTLwLGyxCLfL4iy867wQV"

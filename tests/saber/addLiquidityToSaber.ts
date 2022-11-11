@@ -1,28 +1,27 @@
-import { Transaction } from "@solana/web3.js";
+import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY, Transaction } from "@solana/web3.js";
 import { BN, Program, workspace } from "@project-serum/anchor";
-import { RatioLending } from "../../target/types/ratio_lending";
+import { RatioSdk } from "../../target/types/ratio_sdk";
 import {
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 
-import { addZeros, delay, getAssocTokenAcct, handleTxn, toUiAmount } from "../utils/fxns";
+import { addZeros, delay, getAssocTokenAcct, handleTxn, simulateTxn, toUiAmount } from "../utils/fxns";
 // @ts-ignore
 import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
 import { User } from "../interfaces";
-import { Accounts } from "../config/accounts";
 import { getMintDecimals } from "@project-serum/serum/lib/market";
-import { DECIMALS_USDC, DECIMALS_USDT } from "../utils/constants";
+import { DECIMALS_USDC, DECIMALS_USDT, RATIO_GLOBAL_STATE_KEY, RATIO_TREASURY_KEY } from "../utils/constants";
+import { Accounts } from "../config/accounts";
 
 // program
-const programRatioLending = workspace.RatioLending as Program<RatioLending>;
+const programRatioSdk = workspace.RatioSdk as Program<RatioSdk>;
 
-export const removeLiquidityFromSaber = async (
+export const addLiquidityToSaber = async (
   testUser: User,
-  treasury: User,
   accounts: Accounts
 ) => {
   const testUserWallet = testUser.wallet;
-  const treasuryWallet = treasury.wallet;
+	const treasuryWalletKey = new PublicKey(RATIO_TREASURY_KEY);
   const saberSwap = accounts.saberUsdcUsdtSwap;
 
   const lpMint = saberSwap.state.poolTokenMint;
@@ -31,50 +30,51 @@ export const removeLiquidityFromSaber = async (
 
   const liquidationAmountUi = 0.01;
   const liquidationAmountUiPrecise = addZeros(liquidationAmountUi, await getMintDecimals(testUser.provider.connection, lpMint));
-  console.log("Unwinding Amount: ", liquidationAmountUi);
-
   const user_lp_ata = getAssocTokenAcct(testUserWallet.publicKey, lpMint)[0];
-
+  
   let user_usdc_ata_before = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdcMint, testUserWallet.publicKey, true);
   let user_usdt_ata_before = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdtMint, testUserWallet.publicKey, true);
-  let treasury_usdc_ata_before = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdcMint, treasuryWallet.publicKey, true);
-  let treasury_usdt_ata_before = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdtMint, treasuryWallet.publicKey, true);
+  let treasury_usdc_ata_before = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdcMint, treasuryWalletKey, true);
+  let treasury_usdt_ata_before = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdtMint, treasuryWalletKey, true);
 
   await delay(2000);
-
   let userLpAccountAmountPre = (await testUser.provider.connection.getTokenAccountBalance(user_lp_ata)).value.uiAmount;
   console.log("Lp amount before unwinding in user: ", userLpAccountAmountPre);
 
   let tx = new Transaction();
-  tx.add(await programRatioLending.methods.removeLiquidityFromSaber(
-    new BN(liquidationAmountUiPrecise)
+  tx.add(await programRatioSdk.methods.addLiquidityToSaber(
+    new BN(0),
+    new BN(0)
   ).accounts({
     authority: testUserWallet.publicKey,
-    globalState: accounts.global.pubKey,
-    ataTreasuryA: treasury_usdc_ata_before.address,
-    ataTreasuryB: treasury_usdt_ata_before.address,
-    ataUserLp: user_lp_ata,
-    ataUserA: user_usdc_ata_before.address, //Coin Mint - USDC
-    ataUserB: user_usdt_ata_before.address, //Pc Mint - USDT
-    saberSwapAccount: {
-      ammId: saberSwap.config.swapAccount,
-      authority: saberSwap.config.authority,
-      reserveA: saberSwap.state.tokenA.reserve,
-      reserveB: saberSwap.state.tokenB.reserve,
-      lpMint: saberSwap.state.poolTokenMint,
-      feeAccountA: saberSwap.state.tokenA.adminFeeAccount,
-      feeAccountB: saberSwap.state.tokenB.adminFeeAccount,
-    },
+    globalState: RATIO_GLOBAL_STATE_KEY,
+    ataTokenATreasury: treasury_usdc_ata_before.address,
+    ataTokenBTreasury: treasury_usdt_ata_before.address,
+    ataUserTokenLp: user_lp_ata,
+    ataUserTokenA: user_usdc_ata_before.address, //Coin Mint - USDC
+    ataUserTokenB: user_usdt_ata_before.address, //Pc Mint - USDT
+    reserveTokenA: saberSwap.state.tokenA.reserve,
+    reserveTokenB: saberSwap.state.tokenB.reserve,
+    poolMint: saberSwap.state.poolTokenMint,
+    tokenA: usdcMint,
+    tokenB: usdtMint,
+    swapAccount: saberSwap.config.swapAccount,
+    swapAuthority: saberSwap.config.authority,
     saberStableProgram: saberSwap.config.swapProgramID,
     tokenProgram: TOKEN_PROGRAM_ID,
+    systemProgram: SystemProgram.programId,
+    rent: SYSVAR_RENT_PUBKEY
   }).instruction());
 
+  
+  //let res = await simulateTxn(testUser.provider.connection, tx, testUserWallet.publicKey);
+  //console.log('simulate res =', res);
   await handleTxn(tx, testUser.provider.connection, testUserWallet);
 
   let user_usdc_ata_after = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdcMint, testUserWallet.publicKey, true);
   let user_usdt_ata_after = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdtMint, testUserWallet.publicKey, true);
-  let treasury_usdc_ata_after = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdcMint, treasuryWallet.publicKey, true);
-  let treasury_usdt_ata_after = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdtMint, treasuryWallet.publicKey, true);
+  let treasury_usdc_ata_after = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdcMint, treasuryWalletKey, true);
+  let treasury_usdt_ata_after = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdtMint, treasuryWalletKey, true);
 
   console.log("\nUser Usdc Difference", toUiAmount(Number(user_usdc_ata_after.amount - user_usdc_ata_before.amount), DECIMALS_USDC));
   console.log("User Usdt Difference", toUiAmount(Number(user_usdt_ata_after.amount - user_usdt_ata_before.amount), DECIMALS_USDT));

@@ -1,34 +1,20 @@
 import { PlatformType } from "./types";
 
 // seeds
-export const USDR_TOKEN_SEED = "USDR_TOKEN_SEED";
 export const GLOBAL_STATE_SEED = "GLOBAL_STATE_SEED";
-export const POOL_SEED = "POOL_SEED";
-export const VAULT_SEED = "VAULT_SEED";
-export const MINT_USDR_KEY = "USDrbBQwQbQ2oWHUPfA8QBHcyVxKUq1xHyXsSLKdUq2";
-export const MINT_RATIO_KEY = "ratioMVg27rSZbSvBopUvsdrGUzeALUfFma61mpxc8J";
-export const MINT_USDR_KEYPAIR = [
-  251, 13, 59, 235, 78, 236, 123, 64, 175, 12, 131, 201, 144, 193, 154, 173,
-  223, 234, 42, 241, 204, 119, 249, 83, 15, 47, 6, 121, 184, 68, 85, 163, 7, 7,
-  51, 53, 239, 27, 86, 29, 79, 32, 112, 12, 85, 30, 202, 238, 51, 40, 170, 112,
-  17, 54, 255, 88, 82, 72, 138, 64, 134, 44, 240, 141,
-];
-export const ORACLE_SEED = "ORACLE_SEED";
-export const BLACKLIST_SEED = "BLACKLIST_SEED";
-export const USER_STATE_SEED = "USER_STATE_SEED";
 
 // default platform values
-export const EMER_STATE_DISABLED = 0;
-export const EMER_STATE_ENABLED = 1;
-export const TVL_LIMIT_USD = 1_000_000;
-export const DEBT_CEILING_GLOBAL_USDR = 500_000;
-export const DEBT_CEILING_POOL_USDR = 500_000;
-export const DEBT_CEILING_USER_USDR = 1_000;
 export const DECIMALS_RATIO = 6;
 export const DECIMALS_USDR = 6;
 export const DECIMALS_USD = 6;
 export const DECIMALS_PRICE = 6;
 export const DEFAULT_FEE_NUMERATOR = 30;
+
+// ratio
+export const RATIO_GLOBAL_STATE_KEY = "G4Ssyc3WngzCnHbeeNhtdbEhZ7R7uXHMATuY9Uay2ycX";
+export const RATIO_TREASURY_KEY = "HXCRCJVSpoNPG53ZkCsp6XGBf1Qn3LaxzVqnDepAANDM";
+export const MINT_USDR_KEY = "USDrbBQwQbQ2oWHUPfA8QBHcyVxKUq1xHyXsSLKdUq2";
+export const MINT_RATIO_KEY = "ratioMVg27rSZbSvBopUvsdrGUzeALUfFma61mpxc8J";
 
 // raydium
 export const RAYDIUM_LIQUIDITY_VERSION = 4;
@@ -54,6 +40,7 @@ export const RAYDIUM_USDT_USDC_REWARD_ACC_KEY =
 export const RAYDIUM_USDT_USDC_REWARD_USDC_ACC_KEY =
   "6fomjaXLVgTbTaQLGRnKsJGBJ4Rt556v6NhynWDnrb5u"; // USDC
 
+// saber
 export const SABER_DECIMALS_PROGRAM =
   "DecZY86MU5Gj7kppfUCEmd4LbXXuyZH1yHaP2NTqdiZB";
 export const SABER_DECIMALS_USDC9_WRAPPER_ACCOUNT =

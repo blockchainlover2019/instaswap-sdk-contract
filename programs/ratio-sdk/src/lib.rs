@@ -10,16 +10,8 @@ pub mod utils;
 pub mod events;
 // crates
 use crate::instructions::*;
-use crate::utils::is_global_state_paused;
 
-#[cfg(feature="test")]
-declare_id!("RFTuet6TtLznuHjw3Zh2ResS6RzFJXrfoy1kpZcCHf1");
-
-#[cfg(feature="prev")]
-declare_id!("RFDcBZtLxkMzn63rejLr8gqTLwLGyxCLfL4iy867wQV");
-
-#[cfg(feature="prod")]
-declare_id!("RFLeGTwFXiXXETdJkZuu9iKgXNkYbywLpTu1TioDsDQ");
+declare_id!("5Exy8rs5vusEwFCGHUVZAEo9QtpcTne9ni9jukH2AHB8");
 
 #[program]
 pub mod ratio_sdk {
@@ -35,6 +27,17 @@ pub mod ratio_sdk {
     ) -> Result<()> {
         add_liquidity_to_saber::handle(ctx, old_amount_a, old_amount_b)
     }
+    
+    /**
+     * Remove liqudity to saber, cut fee here.
+     */
+    pub fn remove_liquidity_from_saber(
+      ctx: Context<RemoveLiquidityFromSaber>,
+      lp_amount_to_unwind: u64,
+    ) -> Result<()> {
+        remove_liquidity_from_saber::handle(ctx, lp_amount_to_unwind)
+    }
+    
     /**
      * Add liqudity to raydium
      */
@@ -46,15 +49,7 @@ pub mod ratio_sdk {
     ) -> Result<()> {
         add_liquidity_to_raydium::handle(ctx, version, old_amount_a, old_amount_b)
     }
-    /**
-     * Remove liqudity to saber, cut fee here.
-     */
-    pub fn remove_liquidity_from_saber(
-        ctx: Context<RemoveLiquidityFromSaber>,
-        lp_amount_to_unwind: u64,
-    ) -> Result<()> {
-        remove_liquidity_from_saber::handle(ctx, lp_amount_to_unwind)
-    }
+
     /**
      * Remove Liquidity from Raydium v5, cut fee here.
      */
@@ -64,6 +59,7 @@ pub mod ratio_sdk {
     ) -> Result<()> {
         remove_liquidity_from_raydium_v5::handle(ctx, lp_amount_to_unwind)
     }
+
     /**
      * Remove Liquidity from Raydium v4, cut fee here.
      */
@@ -73,8 +69,7 @@ pub mod ratio_sdk {
     ) -> Result<()> {
         remove_liquidity_from_raydium_v4::handle(ctx, lp_amount_to_unwind)
     }
-    
-        
+
     /**
      * adding decimals via saber add decimals program
      */
@@ -94,5 +89,5 @@ pub mod ratio_sdk {
     ) -> Result<()> {
       unwrap_decimals_token::handle(ctx, old_amount)
     }
-    
+
 }

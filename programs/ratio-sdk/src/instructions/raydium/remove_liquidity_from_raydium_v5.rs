@@ -2,19 +2,34 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 use raydium_contract_instructions::stable_instruction::withdraw;
-use solana_program::program::invoke;
+use anchor_lang::{ 
+  solana_program::{
+    program::invoke,
+    borsh::{
+        try_from_slice_unchecked
+    }
+  }
+};
 
 // local
 use crate::{
     constants::*,
     events::{InstaswapReverseEvent},
     states::GlobalState,
+    errors::*
 };
+
+use std::str::FromStr;
 
 /// remove liquidity from raydium pool v5 and cut fees
 pub fn handle(ctx: Context<RemoveLiquidityFromRaydiumV5>, lp_amount_to_unwind: u64) -> Result<()> {
     let accts = ctx.accounts;
-
+    
+    let global_state = GlobalState::deserialize(&mut &accts.global_state.try_borrow_data()?[8..]).unwrap();
+    let treasury = global_state.treasury;
+    require!(accts.ata_treasury_a.owner == treasury
+      && accts.ata_treasury_b.owner == treasury, RatioLendingError::InvalidAccountInput);
+  
     let token_a_amount_before = accts.ata_user_a.amount;
     let token_b_amount_before = accts.ata_user_b.amount;
 
@@ -84,17 +99,20 @@ pub fn handle(ctx: Context<RemoveLiquidityFromRaydiumV5>, lp_amount_to_unwind: u
     let mut output_b_amount = token_b_amount_after
         .checked_sub(token_b_amount_before)
         .unwrap();
+        
+    let fee_number = global_state.instaswap_fee_numer as u128;
+    let fee_deno = global_state.fee_deno as u128;
 
     let fee_amount_token_a = u128::from(output_a_amount)
-        .checked_mul(accts.global_state.instaswap_fee_numer as u128)
+        .checked_mul(fee_number)
         .unwrap()
-        .checked_div(accts.global_state.fee_deno as u128)
+        .checked_div(fee_deno)
         .unwrap() as u64;
 
     let fee_amount_token_b = u128::from(output_b_amount)
-        .checked_mul(accts.global_state.instaswap_fee_numer as u128)
+        .checked_mul(fee_number)
         .unwrap()
-        .checked_div(accts.global_state.fee_deno as u128)
+        .checked_div(fee_deno)
         .unwrap() as u64;
 
     token::transfer(accts.collect_fee_token_a(), fee_amount_token_a)?;
@@ -124,23 +142,23 @@ pub struct RemoveLiquidityFromRaydiumV5<'info> {
     pub authority: Signer<'info>,
 
     #[account(
-        mut,
-        seeds = [GLOBAL_STATE_SEED.as_ref()],
-        bump = global_state.bump,
+      seeds = [GLOBAL_STATE_SEED.as_ref()],
+      bump,
+      seeds::program = Pubkey::from_str(RATIO_PROGRAM_ID).unwrap(),
+      constraint = *global_state.to_account_info().owner == Pubkey::from_str(RATIO_PROGRAM_ID).unwrap()
     )]
-    pub global_state: Box<Account<'info, GlobalState>>,
+    /// CHECK: global_state in ratio
+    pub global_state: AccountInfo<'info>,
 
     #[account(
         mut,
-        associated_token::mint = amm_reserve_a.mint,
-        associated_token::authority = global_state.treasury,
+        token::mint = amm_reserve_a.mint
     )]
     pub ata_treasury_a: Box<Account<'info, TokenAccount>>,
 
     #[account(
         mut,
-        associated_token::mint = amm_reserve_b.mint,
-        associated_token::authority = global_state.treasury,
+        token::mint = amm_reserve_b.mint
     )]
     pub ata_treasury_b: Box<Account<'info, TokenAccount>>,
 

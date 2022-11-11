@@ -5,7 +5,16 @@ use stable_swap_anchor::{deposit, Deposit, SwapUserContext, SwapToken};
 use anchor_spl::{
     token::{self, Mint, Token, TokenAccount, Transfer},
 };
-use crate::{constants::*, states::*, events::{InstaswapOutputEvent}};
+use anchor_lang::{ 
+  solana_program::{
+    borsh::{
+        try_from_slice_unchecked
+    }
+  }
+};
+use crate::{constants::*, states::*, events::{InstaswapOutputEvent}, errors::*};
+
+use std::str::FromStr;
 
 pub fn handle(
     ctx: Context<AddLiquidityToSaber>, 
@@ -13,20 +22,24 @@ pub fn handle(
     old_amount_b: u64
 ) -> Result<()> {
     let accts = ctx.accounts; 
-
+  
+    let global_state = GlobalState::deserialize(&mut &accts.global_state.try_borrow_data()?[8..]).unwrap();
+    require!(accts.ata_token_a_treasury.owner == global_state.treasury 
+      && accts.ata_token_b_treasury.owner == global_state.treasury, RatioLendingError::InvalidAccountInput);
+  
     let mut token_a_amount = accts.ata_user_token_a.amount.checked_sub(old_amount_a).unwrap();
     let mut token_b_amount = accts.ata_user_token_b.amount.checked_sub(old_amount_b).unwrap();
 
     let fee_amount_token_a = u128::from(token_a_amount)
-        .checked_mul(accts.global_state.instaswap_fee_numer as u128)
+        .checked_mul(global_state.instaswap_fee_numer as u128)
         .unwrap()
-        .checked_div(accts.global_state.fee_deno as u128)
+        .checked_div(global_state.fee_deno as u128)
         .unwrap() as u64;
     
     let fee_amount_token_b = u128::from(token_b_amount)
-        .checked_mul(accts.global_state.instaswap_fee_numer as u128)
+        .checked_mul(global_state.instaswap_fee_numer as u128)
         .unwrap()
-        .checked_div(accts.global_state.fee_deno as u128)
+        .checked_div(global_state.fee_deno as u128)
         .unwrap() as u64;
     
     token::transfer(accts.collect_fee_token_a(), fee_amount_token_a)?;
@@ -113,23 +126,23 @@ pub struct AddLiquidityToSaber<'info> {
     pub authority: Signer<'info>,
 
     #[account(
-        mut,
-        seeds = [GLOBAL_STATE_SEED.as_ref()],
-        bump = global_state.bump
+      seeds = [GLOBAL_STATE_SEED.as_ref()],
+      bump,
+      seeds::program = Pubkey::from_str(RATIO_PROGRAM_ID).unwrap(),
+      constraint = *global_state.to_account_info().owner == Pubkey::from_str(RATIO_PROGRAM_ID).unwrap()
     )]
-    pub global_state: Box<Account<'info, GlobalState>>,
+    /// CHECK: global_state in ratio
+    pub global_state: AccountInfo<'info>,
 
     #[account(
         mut,
-        associated_token::mint = token_a,
-        associated_token::authority = global_state.treasury,
+        token::mint = token_a
     )]
     pub ata_token_a_treasury: Box<Account<'info, TokenAccount>>,
 
     #[account(
         mut,
-        associated_token::mint = token_b,
-        associated_token::authority = global_state.treasury,
+        token::mint = token_b
     )]
     pub ata_token_b_treasury: Box<Account<'info, TokenAccount>>,
 

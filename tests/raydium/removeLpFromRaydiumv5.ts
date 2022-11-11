@@ -1,7 +1,7 @@
 import { Transaction } from "@solana/web3.js";
 import { PublicKey } from "@solana/web3.js";
 import { BN, Program, workspace } from "@project-serum/anchor";
-import { RatioLending } from "../../target/types/ratio_lending";
+import { RatioSdk } from "../../target/types/ratio_sdk";
 import {
 	TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
@@ -10,18 +10,16 @@ import { addZeros, delay, getAssocTokenAcct, handleTxn, toUiAmount } from "../ut
 // @ts-ignore
 import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
 import { User } from "../interfaces";
-import { Accounts } from "../config/accounts";
+import { RATIO_GLOBAL_STATE_KEY, RATIO_TREASURY_KEY } from "../utils/constants";
 
 // program
-const programRatioLending = workspace.RatioLending as Program<RatioLending>;
+const programRatioSdk = workspace.RatioSdk as Program<RatioSdk>;
 
 export const removeLiquidityFromRaydiumV5 = async (
-	testUser: User,
-	treasury: User,
-	accounts: Accounts
+	testUser: User
 ) => {
 	const testUserWallet = testUser.wallet;
-	const treasuryWallet = treasury.wallet;
+	const treasuryWalletKey = new PublicKey(RATIO_TREASURY_KEY);
 
 	// configuration keys for Raydium USDT_USDC Pool on raydium mainnet
 	const config = {
@@ -65,8 +63,8 @@ export const removeLiquidityFromRaydiumV5 = async (
 
 	let user_usdt_ata_before = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdtMint, testUserWallet.publicKey, true);
 	let user_usdc_ata_before = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdcMint, testUserWallet.publicKey, true);
-	let treasury_usdt_ata_before = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdtMint, treasuryWallet.publicKey, true);
-	let treasury_usdc_ata_before = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdcMint, treasuryWallet.publicKey, true);
+	let treasury_usdt_ata_before = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdtMint, treasuryWalletKey, true);
+	let treasury_usdc_ata_before = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdcMint, treasuryWalletKey, true);
 
 	await delay(2000);
 
@@ -79,11 +77,11 @@ export const removeLiquidityFromRaydiumV5 = async (
 	//   units: 1400000,
 	//   additionalFee: 0,
 	// }));
-	tx.add(await programRatioLending.methods.removeLiquidityFromRaydiumV5(
+	tx.add(await programRatioSdk.methods.removeLiquidityFromRaydiumV5(
 		new BN(liquidationAmountUiPrecise)
 	).accounts({
 		authority: testUserWallet.publicKey,
-		globalState: accounts.global.pubKey,
+		globalState: RATIO_GLOBAL_STATE_KEY,
 		ataTreasuryA: treasury_usdt_ata_before.address,
 		ataTreasuryB: treasury_usdc_ata_before.address,
 		ataUserLp: user_lp_ata,
@@ -111,7 +109,6 @@ export const removeLiquidityFromRaydiumV5 = async (
 	);
 
 	await handleTxn(tx, testUser.provider.connection, testUserWallet);
-
 	await delay(2000);
 
 

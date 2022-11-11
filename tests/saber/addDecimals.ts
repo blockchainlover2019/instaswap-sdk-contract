@@ -20,21 +20,19 @@ import {
 // quarry
 import { QuarrySDK, QUARRY_ADDRESSES } from "@quarryprotocol/quarry-sdk";
 // local
-import { RatioLending } from "../../target/types/ratio_lending";
+import { RatioSdk } from "../../target/types/ratio_sdk";
 // import { Periphery } from "../../target/types/periphery";
 import { DECIMALS_USDCUSDT, MINT_SUSDC9_KEY, MINT_USDC_KEY, SABER_DECIMALS_PROGRAM, SABER_DECIMALS_USDC9_WRAPPER_ACCOUNT, SABER_DECWRAPPER_UNDERLYING_TOKENS_ACCOUNT } from "../utils/constants";
-import { Accounts } from "../config/accounts";
 import { User } from "../interfaces/user";
 import { handleTxn, getAssocTokenAcct, createAtaOnChainByKey } from "../utils/fxns";
 import BN from 'bn.js';
 
 // init
-const programRatioLending = workspace.RatioLending as Program<RatioLending>;
+const programRatioSdk = workspace.RatioSdk as Program<RatioSdk>;
 
 
 export const wrapDecimals = async (
-  user: User,
-  accounts: Accounts
+  user: User
 ) => {
   let [userUsdcTokenAccount] = getAssocTokenAcct(user.wallet.publicKey, new PublicKey(MINT_USDC_KEY));
   let usdcPrevBal = (await user.provider.connection.getTokenAccountBalance(userUsdcTokenAccount)).value.uiAmount;
@@ -49,7 +47,7 @@ export const wrapDecimals = async (
     );
   }
 
-  const txn = new Transaction().add(await programRatioLending.methods
+  const txn = new Transaction().add(await programRatioSdk.methods
     .wrapDecimalsToken(new BN(0)) // old_amount is 0
     .accounts({
       authority: user.wallet.publicKey,
@@ -72,8 +70,7 @@ export const wrapDecimals = async (
 }
 
 export const unwrapDecimals = async (
-  user: User,
-  accounts: Accounts
+  user: User
 ) => {
   let [userUsdcTokenAccount] = getAssocTokenAcct(user.wallet.publicKey, new PublicKey(MINT_USDC_KEY));
   let [userSUsdc9TokenAccount] = getAssocTokenAcct(user.wallet.publicKey, new PublicKey(MINT_SUSDC9_KEY));
@@ -81,7 +78,7 @@ export const unwrapDecimals = async (
   let usdcPrevBal = (await user.provider.connection.getTokenAccountBalance(userUsdcTokenAccount)).value.uiAmount;
   let sUsdc9PrevBal = (await user.provider.connection.getTokenAccountBalance(userSUsdc9TokenAccount)).value.uiAmount;
 
-  const txn = new Transaction().add(await programRatioLending.methods
+  const txn = new Transaction().add(await programRatioSdk.methods
     .unwrapDecimalsToken(new BN(0)) // old_amount is 0
     .accounts({
       authority: user.wallet.publicKey,

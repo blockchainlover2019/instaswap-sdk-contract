@@ -1,7 +1,7 @@
 import { ComputeBudgetProgram, Transaction } from "@solana/web3.js";
 import { PublicKey } from "@solana/web3.js";
 import { BN, Program, workspace } from "@project-serum/anchor";
-import { RatioLending } from "../../target/types/ratio_lending";
+import { RatioSdk } from "../../target/types/ratio_sdk";
 import {
 	TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
@@ -10,18 +10,16 @@ import { addZeros, delay, getAssocTokenAcct, handleTxn, toUiAmount } from "../ut
 // @ts-ignore
 import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
 import { User } from "../interfaces";
-import { Accounts } from "../config/accounts";
+import { RATIO_GLOBAL_STATE_KEY, RATIO_TREASURY_KEY } from "../utils/constants";
 
 // program
-const programRatioLending = workspace.RatioLending as Program<RatioLending>;
+const programRatioSdk = workspace.RatioSdk as Program<RatioSdk>;
 
 export const removeLiquidityFromRaydiumV4 = async (
-	testUser: User,
-	treasury: User,
-	accounts: Accounts
+	testUser: User
 ) => {
 	const testUserWallet = testUser.wallet;
-	const treasuryWallet = treasury.wallet;
+	const treasuryWalletKey = new PublicKey(RATIO_TREASURY_KEY);
 
 	// configuration keys for Raydium SOL_USDC Pool on raydium mainnet
 	const config = {
@@ -64,25 +62,23 @@ export const removeLiquidityFromRaydiumV4 = async (
 
 	let user_sol_ata_before = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, solMint, testUserWallet.publicKey, true);
 	let user_usdc_ata_before = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdcMint, testUserWallet.publicKey, true);
-	let treasury_sol_ata_before = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, solMint, treasuryWallet.publicKey, true);
-	let treasury_usdc_ata_before = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdcMint, treasuryWallet.publicKey, true);
+	let treasury_sol_ata_before = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, solMint, treasuryWalletKey, true);
+	let treasury_usdc_ata_before = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdcMint, treasuryWalletKey, true);
 
-	await delay(2000);
-
-	// let userLpAccountAmountPre = (await testUser.provider.connection.getTokenAccountBalance(user_lp_ata)).value.uiAmount;
-	// console.log("Lp amount before unwinding in user: ", userLpAccountAmountPre);
+	let userLpAccountAmountPre = (await testUser.provider.connection.getTokenAccountBalance(user_lp_ata)).value.uiAmount;
+	console.log("Lp amount before unwinding in user: ", userLpAccountAmountPre);
 
 	let tx = new Transaction();
 	// Request additional compute units
 	tx.add(ComputeBudgetProgram.requestUnits({
-	  units: 1400000,
+	  units: 2000000,
 	  additionalFee: 0,
 	}));
-	tx.add(await programRatioLending.methods.removeLiquidityFromRaydiumV4(
+	tx.add(await programRatioSdk.methods.removeLiquidityFromRaydiumV4(
 		new BN(liquidationAmountUiPrecise)
 	).accounts({
 		authority: testUserWallet.publicKey,
-		globalState: accounts.global.pubKey,
+		globalState: RATIO_GLOBAL_STATE_KEY,
 		ataTreasuryA: treasury_sol_ata_before.address,
 		ataTreasuryB: treasury_usdc_ata_before.address,
 		ataUserLp: user_lp_ata,
@@ -114,17 +110,16 @@ export const removeLiquidityFromRaydiumV4 = async (
 
 	await delay(2000);
 
+	let user_sol_ata_after = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, solMint, testUserWallet.publicKey, true);
+	let user_usdc_ata_after = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdcMint, testUserWallet.publicKey, true);
+	let treasury_sol_ata_after = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, solMint, treasuryWalletKey, true);
+	let treasury_usdc_ata_after = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdcMint, treasuryWalletKey, true);
 
-	// let user_sol_ata_after = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, solMint, testUserWallet.publicKey, true);
-	// let user_usdc_ata_after = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdcMint, testUserWallet.publicKey, true);
-	// let treasury_sol_ata_after = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, solMint, treasuryWallet.publicKey, true);
-	// let treasury_usdc_ata_after = await getOrCreateAssociatedTokenAccount(testUser.provider.connection, testUserWallet.payer, usdcMint, treasuryWallet.publicKey, true);
+	console.log("\nUser Sol Difference", toUiAmount(Number(user_sol_ata_after.amount - user_sol_ata_before.amount), config.baseDecimals));
+	console.log("User Usdc Difference", toUiAmount(Number(user_usdc_ata_after.amount - user_usdc_ata_before.amount), config.quoteDecimals));
+	console.log("\Treasury Sol Difference", toUiAmount(Number(treasury_sol_ata_after.amount - treasury_sol_ata_before.amount), config.baseDecimals));
+	console.log("Treasury Usdc Difference", toUiAmount(Number(treasury_usdc_ata_after.amount - treasury_usdc_ata_before.amount), config.quoteDecimals));
 
-	// console.log("\nUser Sol Difference", toUiAmount(Number(user_sol_ata_after.amount - user_sol_ata_before.amount), config.baseDecimals));
-	// console.log("User Usdc Difference", toUiAmount(Number(user_usdc_ata_after.amount - user_usdc_ata_before.amount), config.quoteDecimals));
-	// console.log("\Treasury Sol Difference", toUiAmount(Number(treasury_sol_ata_after.amount - treasury_sol_ata_before.amount), config.baseDecimals));
-	// console.log("Treasury Usdc Difference", toUiAmount(Number(treasury_usdc_ata_after.amount - treasury_usdc_ata_before.amount), config.quoteDecimals));
-
-	// let userLpAccountAmountPost = (await testUser.provider.connection.getTokenAccountBalance(user_lp_ata)).value.uiAmount;
-	// console.log("Lp amount after unwinding in user: ", userLpAccountAmountPost);
+	let userLpAccountAmountPost = (await testUser.provider.connection.getTokenAccountBalance(user_lp_ata)).value.uiAmount;
+	console.log("Lp amount after unwinding in user: ", userLpAccountAmountPost);
 }

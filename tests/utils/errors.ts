@@ -1,6 +1,6 @@
 import { ProgramError } from "@project-serum/anchor";
 // import the custom errors we created
-import { IDL } from "../../target/types/ratio_lending";
+import { IDL } from "../../target/types/ratio_sdk";
 
 export const errors = [
   { code: 0, byte: 0x0, name: "AlreadyInUse", msg: "Already in use" },

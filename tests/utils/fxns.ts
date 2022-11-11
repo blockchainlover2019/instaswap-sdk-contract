@@ -27,12 +27,6 @@ import {
 import { translateError } from "./errors";
 import { TestTokens } from "./types";
 import { User } from "../interfaces/user";
-import { MintPubKey } from "./interfaces";
-import { ATA } from "../interfaces/ata";
-import { TokenCollat } from "../interfaces/TokenCollat";
-import { QuarryClass } from "../interfaces/quarry";
-import { TokenCollatUser } from "../interfaces/TokenCollatUser";
-import { Pool } from "../interfaces/pool";
 
 /**
  * We use user provider and user wallet because
@@ -76,6 +70,20 @@ export const handleTxn = async (
   } catch (error) {
     translateError(error);
   }
+};
+
+export const simulateTxn = async (
+  connection: Connection,
+  tx: Transaction,
+  userPublicKey: PublicKey
+) => {
+  const blockhashInfo = await connection.getLatestBlockhash();
+  tx.recentBlockhash = blockhashInfo.blockhash;
+  tx.feePayer = userPublicKey;
+  const simulationResult = await connection.simulateTransaction(
+    tx.compileMessage()
+  );
+  return simulationResult;
 };
 
 export const airdropSol = async (
@@ -171,99 +179,10 @@ export const getSolBalance = async (
   return await provider.connection.getBalance(pubKey);
 };
 
-export const mintToAta = async (
-  mintTokenStr: TestTokens,
-  mintPubKey: PublicKey,
-  mintAuth: User,
-  dest: ATA,
-  amount: number = 200_000_000 // 0.2 units of token
-) => {
-  // mint to newly created ata
-  const ataBalanceOrig = Number((await getAcctBalance(dest.pubKey)).amount);
-  console.log(`minting ${mintTokenStr} to ata, balance: ${ataBalanceOrig}`);
-  try {
-    await mintTo(
-      mintAuth.provider.connection, // connection — Connection to use
-      mintAuth.wallet.payer, // payer — Payer of the transaction fees
-      mintPubKey, // mint — Mint for the account
-      dest.pubKey, // destination — Address of the account to mint to
-      mintAuth.wallet.publicKey, // authority — Minting authority
-      amount // amount — Amount to mint
-    );
-  } catch (error) {
-    throw error;
-  }
-  const ataBalanceNew = Number((await getAcctBalance(dest.pubKey)).amount);
-  const diff = ataBalanceNew - ataBalanceOrig;
-  console.log(`ata balance: ${ataBalanceOrig} -> ${ataBalanceNew}  ∆=${diff}`);
-};
-
-/**
- * Create an associated token account (ATA) for a given user-auth account.
- *
- * 1. Derive the ATA.
- * 2. Create the ATA on chain
- * 3. Mint token to the ATA
- *
- * @param userWallet
- * @param userConnection
- * @param mintPubKey - the mint pub key
- * @param authorityPubKey - the authority
- */
-export const deriveAndInitAta = async (
-  userWallet: Wallet,
-  userConnection: Connection,
-  mintPubKey: PublicKey,
-  authorityPubKey?: PublicKey
-): Promise<[PublicKey, number]> => {
-  const auth = authorityPubKey || userWallet.publicKey;
-  // 1) get token acct for user
-  const [ataPubKey, bump] = getAssocTokenAcct(auth, mintPubKey);
-
-  // create instruction & add to transaction
-  const txn = new Transaction().add(
-    createAssociatedTokenAccountInstruction(
-      userWallet.publicKey, // payer: web3.PublicKey,
-      ataPubKey, // associatedToken: web3.PublicKey,
-      auth, // owner: web3.PublicKey,
-      mintPubKey // mint: web3.PublicKey,
-    )
-  );
-
-  // sign and send
-  await handleTxn(txn, userConnection, userWallet);
-  return [ataPubKey, bump];
-};
-
-export const createAtaOnChain = async (
-  userWallet: Wallet,
-  ata: ATA,
-  mintPubKey: MintPubKey,
-  auth?: PublicKey,
-  userConnection: Connection = null
-) => {
-  // check if the mint exists
-  if (!(await userConnection.getAccountInfo(mintPubKey)))
-    throw new Error("Mint account does not exist");
-
-  const txn = new Transaction().add(
-    createAssociatedTokenAccountInstruction(
-      userWallet.publicKey, // payer: web3.PublicKey,
-      ata.pubKey, // associatedToken: web3.PublicKey,
-      auth || userWallet.publicKey, // owner: web3.PublicKey,
-      mintPubKey // mint: web3.PublicKey,
-    )
-  );
-  if (userConnection) {
-    await handleTxn(txn, userConnection, userWallet);
-  } else {
-    throw new Error("no connection provided");
-  }
-};
 export const createAtaOnChainByKey = async (
   userWallet: Wallet,
   ataKey: PublicKey,
-  mintPubKey: MintPubKey,
+  mintPubKey: PublicKey,
   auth?: PublicKey,
   userConnection: Connection = null
 ) => {

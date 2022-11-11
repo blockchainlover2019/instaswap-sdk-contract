@@ -13,12 +13,12 @@ use borsh::{ BorshDeserialize };
 use anchor_spl::{
     token::{self, Mint, Token, TokenAccount, Transfer},
 };
-use crate::{constants::*, states::*, events::{InstaswapOutputEvent}};
+use crate::{constants::*, states::*, events::{InstaswapOutputEvent}, errors::*};
 use raydium_contract_instructions::stable_instruction::{
   AmmInstruction,
   DepositInstruction,
 };
-
+use std::str::FromStr;
 pub fn handle(
     ctx: Context<AddLiquidityToRaydium>, 
     version: u8,
@@ -26,21 +26,27 @@ pub fn handle(
     old_amount_b: u64
 ) -> Result<()> {
     let accts = ctx.accounts;
+    
+    // let global_state = try_from_slice_unchecked::<GlobalState>(&accts.global_state.try_borrow_data()?)?;
+    let global_state = Box::new(GlobalState::deserialize(&mut &accts.global_state.try_borrow_data()?[8..]).unwrap());
+    
+    require!(accts.ata_token_a_treasury.owner == global_state.treasury 
+      && accts.ata_token_b_treasury.owner == global_state.treasury, RatioLendingError::InvalidAccountInput);
 
     let mut token_a_amount = accts.ata_user_token_a.amount.checked_sub(old_amount_a).unwrap();
     let mut token_b_amount = accts.ata_user_token_b.amount.checked_sub(old_amount_b).unwrap();
 
     // cut fee
     let fee_amount_token_a = u128::from(token_a_amount)
-      .checked_mul(accts.global_state.instaswap_fee_numer as u128)
+      .checked_mul(global_state.instaswap_fee_numer as u128)
       .unwrap()
-      .checked_div(accts.global_state.fee_deno as u128)
+      .checked_div(global_state.fee_deno as u128)
       .unwrap() as u64;
 
     let fee_amount_token_b = u128::from(token_b_amount)
-        .checked_mul(accts.global_state.instaswap_fee_numer as u128)
+        .checked_mul(global_state.instaswap_fee_numer as u128)
         .unwrap()
-        .checked_div(accts.global_state.fee_deno as u128)
+        .checked_div(global_state.fee_deno as u128)
         .unwrap() as u64;
 
     token_a_amount = token_a_amount.checked_sub(fee_amount_token_a).unwrap();
@@ -55,11 +61,11 @@ pub fn handle(
     let quote_need_take_pnl;
 
     if version == 4 {
-      let parsed_amm_info_v4: RaydiumLiquidityStateV4 = try_from_slice_unchecked::<RaydiumLiquidityStateV4>(&amm_info)?;
+      let parsed_amm_info_v4 = Box::new(try_from_slice_unchecked::<RaydiumLiquidityStateV4>(&amm_info)?);
       base_need_take_pnl = parsed_amm_info_v4.base_need_take_pnl;
       quote_need_take_pnl = parsed_amm_info_v4.quote_need_take_pnl;
     } else {
-      let parsed_amm_info_v5: RaydiumLiquidityStateV5 = try_from_slice_unchecked::<RaydiumLiquidityStateV5>(&amm_info)?;
+      let parsed_amm_info_v5 = Box::new(try_from_slice_unchecked::<RaydiumLiquidityStateV5>(&amm_info)?);
       base_need_take_pnl = parsed_amm_info_v5.base_need_take_pnl;
       quote_need_take_pnl = parsed_amm_info_v5.quote_need_take_pnl;
     }
@@ -109,6 +115,8 @@ pub fn handle(
     drop(orders_info);
 
     let ata_user_token_lp_amount_before = accts.ata_user_token_lp.amount;
+    
+    msg!("token amounts = {:?}, {:?}", token_a_amount, token_b_amount);
 
     let data = AmmInstruction::Deposit(DepositInstruction {
       max_coin_amount: token_a_amount,
@@ -244,23 +252,23 @@ pub struct AddLiquidityToRaydium<'info> {
     pub authority: Signer<'info>,
 
     #[account(
-        mut,
-        seeds = [GLOBAL_STATE_SEED.as_ref()],
-        bump = global_state.bump
+      seeds = [GLOBAL_STATE_SEED.as_ref()],
+      bump,
+      seeds::program = Pubkey::from_str(RATIO_PROGRAM_ID).unwrap(),
+      constraint = *global_state.to_account_info().owner == Pubkey::from_str(RATIO_PROGRAM_ID).unwrap()
     )]
-    pub global_state: Box<Account<'info, GlobalState>>,
+    /// CHECK: global_state in ratio
+    pub global_state: AccountInfo<'info>,
 
     #[account(
       mut,
-      associated_token::mint = token_a,
-      associated_token::authority = global_state.treasury,
+      token::mint = token_a
     )]
     pub ata_token_a_treasury: Box<Account<'info, TokenAccount>>,
 
     #[account(
         mut,
-        associated_token::mint = token_b,
-        associated_token::authority = global_state.treasury,
+        token::mint = token_b
     )]
     pub ata_token_b_treasury: Box<Account<'info, TokenAccount>>,
 
