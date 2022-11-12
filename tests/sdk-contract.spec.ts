@@ -22,7 +22,7 @@ const programRatioSdk = workspace.RatioSdk as Program<RatioSdk>;
 // init variables
 const users = new Users()
 let accounts: Accounts;
-describe("ratio core test suite", async () => {
+describe("ratio sdk core test suite", async () => {
   // Configure the client to use the local cluster.
   const provider = programRatioSdk.provider;
   setProvider(provider);

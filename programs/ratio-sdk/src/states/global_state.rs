@@ -1,6 +1,5 @@
 // libraries
 use anchor_lang::prelude::*;
-use borsh::{ BorshDeserialize };
 
 #[account]
 #[derive(Default, Debug)]

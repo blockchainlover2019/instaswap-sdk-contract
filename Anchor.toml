@@ -219,13 +219,13 @@ address = "JEFFSQ3s8T3wKsvp4tnRAsUBW7Cqgnf8ukBZC4C8XBm1"
 address = "G4Ssyc3WngzCnHbeeNhtdbEhZ7R7uXHMATuY9Uay2ycX"
 
 [programs.localnet]
-ratio_sdk = "5Exy8rs5vusEwFCGHUVZAEo9QtpcTne9ni9jukH2AHB8"
+ratio_sdk = "RFSdkrL3XWXdNKBzGKDsXHmHSSYh4BD2n8NZq6KicMZ"
 
 [programs.devnet]
-ratio_sdk = "5Exy8rs5vusEwFCGHUVZAEo9QtpcTne9ni9jukH2AHB8"
+ratio_sdk = "RFSdkrL3XWXdNKBzGKDsXHmHSSYh4BD2n8NZq6KicMZ"
 
 [programs.mainnet]
-ratio_sdk = "5Exy8rs5vusEwFCGHUVZAEo9QtpcTne9ni9jukH2AHB8"
+ratio_sdk = "RFSdkrL3XWXdNKBzGKDsXHmHSSYh4BD2n8NZq6KicMZ"
 
 [test]
 startup_wait = 100_000

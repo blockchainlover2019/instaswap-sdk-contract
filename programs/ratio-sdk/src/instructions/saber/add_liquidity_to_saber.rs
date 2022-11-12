@@ -5,13 +5,6 @@ use stable_swap_anchor::{deposit, Deposit, SwapUserContext, SwapToken};
 use anchor_spl::{
     token::{self, Mint, Token, TokenAccount, Transfer},
 };
-use anchor_lang::{ 
-  solana_program::{
-    borsh::{
-        try_from_slice_unchecked
-    }
-  }
-};
 use crate::{constants::*, states::*, events::{InstaswapOutputEvent}, errors::*};
 
 use std::str::FromStr;

@@ -11,7 +11,7 @@ pub mod events;
 // crates
 use crate::instructions::*;
 
-declare_id!("5Exy8rs5vusEwFCGHUVZAEo9QtpcTne9ni9jukH2AHB8");
+declare_id!("RFSdkrL3XWXdNKBzGKDsXHmHSSYh4BD2n8NZq6KicMZ");
 
 #[program]
 pub mod ratio_sdk {
